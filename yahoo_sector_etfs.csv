@@ -1,0 +1,81 @@
+﻿sector,yahoo_sector_key,rank,ticker,etf_name,source_url,retrieved_at_utc
+Consumer Discretionary,consumer-cyclical,1,XLY,State Street Consumer Discretio,https://finance.yahoo.com/research-hub/screener/sec-ind_sec-top-etfs_consumer-cyclical/,2026-07-17T03:37:13+00:00
+Consumer Discretionary,consumer-cyclical,2,VCR,Vanguard Consumer Discretion ET,https://finance.yahoo.com/research-hub/screener/sec-ind_sec-top-etfs_consumer-cyclical/,2026-07-17T03:37:13+00:00
+Consumer Discretionary,consumer-cyclical,3,ITB,iShares U.S. Home Construction ,https://finance.yahoo.com/research-hub/screener/sec-ind_sec-top-etfs_consumer-cyclical/,2026-07-17T03:37:13+00:00
+Consumer Discretionary,consumer-cyclical,4,FDIS,Fidelity MSCI Consumer Discreti,https://finance.yahoo.com/research-hub/screener/sec-ind_sec-top-etfs_consumer-cyclical/,2026-07-17T03:37:13+00:00
+Consumer Discretionary,consumer-cyclical,5,XHB,State Street SPDR S&P Homebuild,https://finance.yahoo.com/research-hub/screener/sec-ind_sec-top-etfs_consumer-cyclical/,2026-07-17T03:37:13+00:00
+Consumer Discretionary,consumer-cyclical,6,IYC,iShares U.S. Consumer Discretio,https://finance.yahoo.com/research-hub/screener/sec-ind_sec-top-etfs_consumer-cyclical/,2026-07-17T03:37:13+00:00
+Consumer Discretionary,consumer-cyclical,7,NAIL,Direxion Daily Homebuilders & S,https://finance.yahoo.com/research-hub/screener/sec-ind_sec-top-etfs_consumer-cyclical/,2026-07-17T03:37:13+00:00
+Consumer Discretionary,consumer-cyclical,8,XRT,State Street SPDR S&P Retail ET,https://finance.yahoo.com/research-hub/screener/sec-ind_sec-top-etfs_consumer-cyclical/,2026-07-17T03:37:13+00:00
+Consumer Discretionary,consumer-cyclical,9,RSPD,Invesco S&P 500 Equal Weight Co,https://finance.yahoo.com/research-hub/screener/sec-ind_sec-top-etfs_consumer-cyclical/,2026-07-17T03:37:13+00:00
+Consumer Discretionary,consumer-cyclical,10,PEJ,Invesco Leisure and Entertainme,https://finance.yahoo.com/research-hub/screener/sec-ind_sec-top-etfs_consumer-cyclical/,2026-07-17T03:37:13+00:00
+Consumer Staples,consumer-defensive,1,XLP,State Street Consumer Staples S,https://finance.yahoo.com/research-hub/screener/sec-ind_sec-top-etfs_consumer-defensive/,2026-07-17T03:37:13+00:00
+Consumer Staples,consumer-defensive,2,VDC,Vanguard Consumer Staples ETF,https://finance.yahoo.com/research-hub/screener/sec-ind_sec-top-etfs_consumer-defensive/,2026-07-17T03:37:13+00:00
+Consumer Staples,consumer-defensive,3,FSTA,Fidelity MSCI COnsumer Staples ,https://finance.yahoo.com/research-hub/screener/sec-ind_sec-top-etfs_consumer-defensive/,2026-07-17T03:37:13+00:00
+Consumer Staples,consumer-defensive,4,IYK,iShares U.S. Consumer Staples E,https://finance.yahoo.com/research-hub/screener/sec-ind_sec-top-etfs_consumer-defensive/,2026-07-17T03:37:13+00:00
+Consumer Staples,consumer-defensive,5,KXI,iShares Global Consumer Staples,https://finance.yahoo.com/research-hub/screener/sec-ind_sec-top-etfs_consumer-defensive/,2026-07-17T03:37:13+00:00
+Consumer Staples,consumer-defensive,6,RSPS,Invesco S&P 500 Equal Weight Co,https://finance.yahoo.com/research-hub/screener/sec-ind_sec-top-etfs_consumer-defensive/,2026-07-17T03:37:13+00:00
+Consumer Staples,consumer-defensive,7,FXG,First Trust Cons. Staples Alpha,https://finance.yahoo.com/research-hub/screener/sec-ind_sec-top-etfs_consumer-defensive/,2026-07-17T03:37:13+00:00
+Consumer Staples,consumer-defensive,8,HIMZ,Defiance Daily Target 2X Long H,https://finance.yahoo.com/research-hub/screener/sec-ind_sec-top-etfs_consumer-defensive/,2026-07-17T03:37:13+00:00
+Consumer Staples,consumer-defensive,9,PBJ,Invesco Food & Beverage ETF,https://finance.yahoo.com/research-hub/screener/sec-ind_sec-top-etfs_consumer-defensive/,2026-07-17T03:37:13+00:00
+Consumer Staples,consumer-defensive,10,PSL,Invesco Dorsey Wright Consumer ,https://finance.yahoo.com/research-hub/screener/sec-ind_sec-top-etfs_consumer-defensive/,2026-07-17T03:37:13+00:00
+Energy,energy,1,XLE,State Street Energy Select Sect,https://finance.yahoo.com/research-hub/screener/sec-ind_sec-top-etfs_energy/,2026-07-17T03:37:13+00:00
+Energy,energy,2,AMLP,Alerian MLP ETF,https://finance.yahoo.com/research-hub/screener/sec-ind_sec-top-etfs_energy/,2026-07-17T03:37:13+00:00
+Energy,energy,3,VDE,Vanguard Energy ETF,https://finance.yahoo.com/research-hub/screener/sec-ind_sec-top-etfs_energy/,2026-07-17T03:37:13+00:00
+Energy,energy,4,MLPX,Global X MLP & Energy Infrastru,https://finance.yahoo.com/research-hub/screener/sec-ind_sec-top-etfs_energy/,2026-07-17T03:37:13+00:00
+Energy,energy,5,XOP,State Street SPDR S&P Oil & Gas,https://finance.yahoo.com/research-hub/screener/sec-ind_sec-top-etfs_energy/,2026-07-17T03:37:13+00:00
+Energy,energy,6,MLPA,Global X MLP ETF,https://finance.yahoo.com/research-hub/screener/sec-ind_sec-top-etfs_energy/,2026-07-17T03:37:13+00:00
+Energy,energy,7,IXC,iShares Global Energy ETF,https://finance.yahoo.com/research-hub/screener/sec-ind_sec-top-etfs_energy/,2026-07-17T03:37:13+00:00
+Energy,energy,8,OIH,VanEck Oil Services ETF,https://finance.yahoo.com/research-hub/screener/sec-ind_sec-top-etfs_energy/,2026-07-17T03:37:13+00:00
+Energy,energy,9,FENY,Fidelity MSCI Energy Index ETF,https://finance.yahoo.com/research-hub/screener/sec-ind_sec-top-etfs_energy/,2026-07-17T03:37:13+00:00
+Energy,energy,10,IYE,iShares U.S. Energy ETF,https://finance.yahoo.com/research-hub/screener/sec-ind_sec-top-etfs_energy/,2026-07-17T03:37:13+00:00
+Financials,financial-services,1,XLF,State Street Financial Select S,https://finance.yahoo.com/research-hub/screener/sec-ind_sec-top-etfs_financial-services/,2026-07-17T03:37:13+00:00
+Financials,financial-services,2,VFH,Vanguard Financials ETF,https://finance.yahoo.com/research-hub/screener/sec-ind_sec-top-etfs_financial-services/,2026-07-17T03:37:13+00:00
+Financials,financial-services,3,KBWB,Invesco KBW Bank ETF,https://finance.yahoo.com/research-hub/screener/sec-ind_sec-top-etfs_financial-services/,2026-07-17T03:37:13+00:00
+Financials,financial-services,4,KRE,State Street SPDR S&P Regional ,https://finance.yahoo.com/research-hub/screener/sec-ind_sec-top-etfs_financial-services/,2026-07-17T03:37:13+00:00
+Financials,financial-services,5,NVDL,GraniteShares 2x Long NVDA Dail,https://finance.yahoo.com/research-hub/screener/sec-ind_sec-top-etfs_financial-services/,2026-07-17T03:37:13+00:00
+Financials,financial-services,6,IYF,iShares U.S. Financial ETF,https://finance.yahoo.com/research-hub/screener/sec-ind_sec-top-etfs_financial-services/,2026-07-17T03:37:13+00:00
+Financials,financial-services,7,FNCL,Fidelity MSCI Financials Index ,https://finance.yahoo.com/research-hub/screener/sec-ind_sec-top-etfs_financial-services/,2026-07-17T03:37:13+00:00
+Financials,financial-services,8,FAS,Direxion Financial Bull 3X ETF,https://finance.yahoo.com/research-hub/screener/sec-ind_sec-top-etfs_financial-services/,2026-07-17T03:37:13+00:00
+Financials,financial-services,9,IYG,iShares U.S. Financial Services,https://finance.yahoo.com/research-hub/screener/sec-ind_sec-top-etfs_financial-services/,2026-07-17T03:37:13+00:00
+Financials,financial-services,10,BIZD,VanEck BDC Income ETF,https://finance.yahoo.com/research-hub/screener/sec-ind_sec-top-etfs_financial-services/,2026-07-17T03:37:13+00:00
+Healthcare,healthcare,1,XLV,State Street Health Care Select,https://finance.yahoo.com/research-hub/screener/sec-ind_sec-top-etfs_healthcare/,2026-07-17T03:37:13+00:00
+Healthcare,healthcare,2,VHT,Vanguard Health Care ETF,https://finance.yahoo.com/research-hub/screener/sec-ind_sec-top-etfs_healthcare/,2026-07-17T03:37:13+00:00
+Healthcare,healthcare,3,XBI,State Street SPDR S&P Biotech E,https://finance.yahoo.com/research-hub/screener/sec-ind_sec-top-etfs_healthcare/,2026-07-17T03:37:13+00:00
+Healthcare,healthcare,4,IBB,iShares Biotechnology ETF,https://finance.yahoo.com/research-hub/screener/sec-ind_sec-top-etfs_healthcare/,2026-07-17T03:37:13+00:00
+Healthcare,healthcare,5,IXJ,iShares Global Healthcare ETF,https://finance.yahoo.com/research-hub/screener/sec-ind_sec-top-etfs_healthcare/,2026-07-17T03:37:13+00:00
+Healthcare,healthcare,6,FHLC,Fidelity MSCI Health Care Index,https://finance.yahoo.com/research-hub/screener/sec-ind_sec-top-etfs_healthcare/,2026-07-17T03:37:13+00:00
+Healthcare,healthcare,7,IYH,iShares U.S. Healthcare ETF,https://finance.yahoo.com/research-hub/screener/sec-ind_sec-top-etfs_healthcare/,2026-07-17T03:37:13+00:00
+Healthcare,healthcare,8,IHI,iShares U.S. Medical Devices ET,https://finance.yahoo.com/research-hub/screener/sec-ind_sec-top-etfs_healthcare/,2026-07-17T03:37:13+00:00
+Healthcare,healthcare,9,FBT,First Trust Amex Biotech Index ,https://finance.yahoo.com/research-hub/screener/sec-ind_sec-top-etfs_healthcare/,2026-07-17T03:37:13+00:00
+Healthcare,healthcare,10,ARKG,ARK Genomic Revolution ETF,https://finance.yahoo.com/research-hub/screener/sec-ind_sec-top-etfs_healthcare/,2026-07-17T03:37:13+00:00
+Industrials,industrials,1,XLI,State Street Industrial Select ,https://finance.yahoo.com/research-hub/screener/sec-ind_sec-top-etfs_industrials/,2026-07-17T03:37:13+00:00
+Industrials,industrials,2,PAVE,Global X U.S. Infrastructure De,https://finance.yahoo.com/research-hub/screener/sec-ind_sec-top-etfs_industrials/,2026-07-17T03:37:13+00:00
+Industrials,industrials,3,ITA,iShares U.S. Aerospace & Defens,https://finance.yahoo.com/research-hub/screener/sec-ind_sec-top-etfs_industrials/,2026-07-17T03:37:13+00:00
+Industrials,industrials,4,AIRR,First Trust RBA American Indust,https://finance.yahoo.com/research-hub/screener/sec-ind_sec-top-etfs_industrials/,2026-07-17T03:37:13+00:00
+Industrials,industrials,5,VIS,Vanguard Industrials ETF,https://finance.yahoo.com/research-hub/screener/sec-ind_sec-top-etfs_industrials/,2026-07-17T03:37:13+00:00
+Industrials,industrials,6,PPA,Invesco Aerospace & Defense ETF,https://finance.yahoo.com/research-hub/screener/sec-ind_sec-top-etfs_industrials/,2026-07-17T03:37:13+00:00
+Industrials,industrials,7,SHLD,Global X Defense Tech ETF,https://finance.yahoo.com/research-hub/screener/sec-ind_sec-top-etfs_industrials/,2026-07-17T03:37:13+00:00
+Industrials,industrials,8,XAR,State Street SPDR S&P Aerospace,https://finance.yahoo.com/research-hub/screener/sec-ind_sec-top-etfs_industrials/,2026-07-17T03:37:13+00:00
+Industrials,industrials,9,IDEF,iShares Defense Industrials Act,https://finance.yahoo.com/research-hub/screener/sec-ind_sec-top-etfs_industrials/,2026-07-17T03:37:13+00:00
+Industrials,industrials,10,FIDU,Fidelity MSCI Industrials Index,https://finance.yahoo.com/research-hub/screener/sec-ind_sec-top-etfs_industrials/,2026-07-17T03:37:13+00:00
+Technology,technology,1,QQQ,"Invesco QQQ Trust, Series 1",https://finance.yahoo.com/research-hub/screener/sec-ind_sec-top-etfs_technology/,2026-07-17T03:37:13+00:00
+Technology,technology,2,VGT,Vanguard Information Tech ETF,https://finance.yahoo.com/research-hub/screener/sec-ind_sec-top-etfs_technology/,2026-07-17T03:37:13+00:00
+Technology,technology,3,XLK,State Street Technology Select ,https://finance.yahoo.com/research-hub/screener/sec-ind_sec-top-etfs_technology/,2026-07-17T03:37:13+00:00
+Technology,technology,4,QQQM,Invesco NASDAQ 100 ETF,https://finance.yahoo.com/research-hub/screener/sec-ind_sec-top-etfs_technology/,2026-07-17T03:37:13+00:00
+Technology,technology,5,SMH,VanEck Semiconductor ETF,https://finance.yahoo.com/research-hub/screener/sec-ind_sec-top-etfs_technology/,2026-07-17T03:37:13+00:00
+Technology,technology,6,SOXX,iShares PHLX SOX Semiconductor ,https://finance.yahoo.com/research-hub/screener/sec-ind_sec-top-etfs_technology/,2026-07-17T03:37:13+00:00
+Technology,technology,7,JEPQ,JPMorgan Nasdaq Equity Premium ,https://finance.yahoo.com/research-hub/screener/sec-ind_sec-top-etfs_technology/,2026-07-17T03:37:13+00:00
+Technology,technology,8,SOXL,Direxion Daily Semiconductor Bu,https://finance.yahoo.com/research-hub/screener/sec-ind_sec-top-etfs_technology/,2026-07-17T03:37:13+00:00
+Technology,technology,9,IYW,iShares U.S. Technology ETF,https://finance.yahoo.com/research-hub/screener/sec-ind_sec-top-etfs_technology/,2026-07-17T03:37:13+00:00
+Technology,technology,10,FTEC,Fidelity MSCI Information Techn,https://finance.yahoo.com/research-hub/screener/sec-ind_sec-top-etfs_technology/,2026-07-17T03:37:13+00:00
+Telecom,communication-services,1,XLC,State Street Communication Serv,https://finance.yahoo.com/research-hub/screener/sec-ind_sec-top-etfs_communication-services/,2026-07-17T03:37:13+00:00
+Telecom,communication-services,2,VOX,Vanguard Communication Services,https://finance.yahoo.com/research-hub/screener/sec-ind_sec-top-etfs_communication-services/,2026-07-17T03:37:13+00:00
+Telecom,communication-services,3,FCOM,Fidelity MSCI Communication Ser,https://finance.yahoo.com/research-hub/screener/sec-ind_sec-top-etfs_communication-services/,2026-07-17T03:37:13+00:00
+Telecom,communication-services,4,IYZ,iShares U.S. Telecommunications,https://finance.yahoo.com/research-hub/screener/sec-ind_sec-top-etfs_communication-services/,2026-07-17T03:37:13+00:00
+Telecom,communication-services,5,IXP,iShares Global Comm Services ET,https://finance.yahoo.com/research-hub/screener/sec-ind_sec-top-etfs_communication-services/,2026-07-17T03:37:13+00:00
+Telecom,communication-services,6,GXPC,Global X PureCap MSCI Communica,https://finance.yahoo.com/research-hub/screener/sec-ind_sec-top-etfs_communication-services/,2026-07-17T03:37:13+00:00
+Telecom,communication-services,7,RSPC,Invesco S&P 500 Equal Weight Co,https://finance.yahoo.com/research-hub/screener/sec-ind_sec-top-etfs_communication-services/,2026-07-17T03:37:13+00:00
+Telecom,communication-services,8,GOOX,T-Rex 2X Long Alphabet Daily Ta,https://finance.yahoo.com/research-hub/screener/sec-ind_sec-top-etfs_communication-services/,2026-07-17T03:37:13+00:00
+Telecom,communication-services,9,TRUC,VanEck Communication Services T,https://finance.yahoo.com/research-hub/screener/sec-ind_sec-top-etfs_communication-services/,2026-07-17T03:37:13+00:00
+Telecom,communication-services,10,GOLS,Gabelli Opportunities in Live a,https://finance.yahoo.com/research-hub/screener/sec-ind_sec-top-etfs_communication-services/,2026-07-17T03:37:13+00:00
