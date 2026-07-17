@@ -2,10 +2,9 @@ name: Update Yahoo Sector ETFs
 
 on:
   schedule:
-    # Runs every Monday at 06:00 UTC
+    # Every Monday at 06:00 UTC
     - cron: "0 6 * * 1"
 
-  # Also allows you to run it manually from the Actions tab
   workflow_dispatch:
 
 permissions:
@@ -24,6 +23,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
         with:
+          ref: main
           fetch-depth: 0
 
       - name: Set up Python
@@ -34,45 +34,98 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          python -m pip install pandas yfinance
+          python -m pip install --upgrade pandas yfinance
 
-      - name: Download sector ETF lists
+      - name: Download Yahoo sector ETF data
         run: python yahoo_sector_etfs.py
 
-      - name: Commit updated CSV
+      - name: Validate generated files
+        shell: bash
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          set -euo pipefail
 
-          git add yahoo_sector_etfs.csv
+          COMPACT_FILE="data/excel/sector_etfs_compact.csv"
+
+          if [ ! -f "$COMPACT_FILE" ]; then
+            echo "Error: $COMPACT_FILE was not created."
+            exit 1
+          fi
+
+          RAW_COUNT=$(find data/raw -maxdepth 1 -type f             -name "*.csv" ! -name "*_screener.csv" | wc -l)
+
+          if [ "$RAW_COUNT" -ne 8 ]; then
+            echo "Error: expected 8 detailed raw sector CSV files, found $RAW_COUNT."
+            find data -maxdepth 3 -type f -print
+            exit 1
+          fi
+
+          COMPACT_ROWS=$(($(wc -l < "$COMPACT_FILE") - 1))
+
+          if [ "$COMPACT_ROWS" -le 0 ]; then
+            echo "Error: compact CSV contains no ETF rows."
+            exit 1
+          fi
+
+          echo "Validation passed."
+          echo "Detailed raw sector files: $RAW_COUNT"
+          echo "Compact ETF rows: $COMPACT_ROWS"
+          find data -maxdepth 3 -type f -name "*.csv" -print
+
+      - name: Commit and push generated CSV files
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          git config user.name "github-actions[bot]"
+          git config user.email             "41898282+github-actions[bot]@users.noreply.github.com"
+
+          TEMP_DATA_DIR=$(mktemp -d)
+          cp -R data "$TEMP_DATA_DIR/data"
+
+          git fetch origin main
+          git reset --hard origin/main
+
+          rm -rf data
+          cp -R "$TEMP_DATA_DIR/data" data
+
+          git add data/
 
           if git diff --cached --quiet; then
-            echo "No changes to commit."
-          else
-            git commit -m "Update Yahoo sector ETF lists"
-            for attempt in 1 2 3; do
-              if git pull --rebase origin "${GITHUB_REF_NAME}" && \
-                 git push origin "HEAD:${GITHUB_REF_NAME}"; then
-                echo "Push succeeded on attempt ${attempt}."
-                break
-              fi
-
-              if [ "${attempt}" -eq 3 ]; then
-                echo "Push failed after ${attempt} attempts."
-                exit 1
-              fi
-
-              echo "Push rejected; retrying in ${attempt}s..."
-              sleep "${attempt}"
-              git fetch origin "${GITHUB_REF_NAME}"
-              git rebase "origin/${GITHUB_REF_NAME}"
-              if git push origin "HEAD:${GITHUB_REF_NAME}"; then
-                break
-              fi
-              if [ "$attempt" -eq 3 ]; then
-                echo "Push failed after ${attempt} attempts."
-                exit 1
-              fi
-              echo "Push rejected due to remote updates. Retrying..."
-            done
+            echo "Yahoo sector ETF data has not changed."
+            exit 0
           fi
+
+          git commit -m "Update Yahoo sector ETF data"
+
+          for attempt in 1 2 3; do
+            if git push origin HEAD:main; then
+              echo "Sector ETF data successfully pushed to main."
+              exit 0
+            fi
+
+            if [ "$attempt" -eq 3 ]; then
+              echo "Push failed after 3 attempts."
+              exit 1
+            fi
+
+            echo "Remote changed. Synchronising and retrying..."
+
+            rm -rf "$TEMP_DATA_DIR/data"
+            cp -R data "$TEMP_DATA_DIR/data"
+
+            git fetch origin main
+            git reset --hard origin/main
+
+            rm -rf data
+            cp -R "$TEMP_DATA_DIR/data" data
+
+            git add data/
+
+            if git diff --cached --quiet; then
+              echo "The latest generated data is already on main."
+              exit 0
+            fi
+
+            git commit -m "Update Yahoo sector ETF data"
+            sleep $((attempt * 5))
+          done
