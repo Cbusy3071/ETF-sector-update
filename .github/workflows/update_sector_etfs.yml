@@ -48,5 +48,7 @@ jobs:
             echo "No changes to commit."
           else
             git commit -m "Update Yahoo sector ETF lists"
-            git push
+            git fetch origin "${GITHUB_REF_NAME}"
+            git rebase "origin/${GITHUB_REF_NAME}"
+            git push origin "HEAD:${GITHUB_REF_NAME}"
           fi
