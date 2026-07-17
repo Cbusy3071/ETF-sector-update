@@ -1,0 +1,52 @@
+name: Update Yahoo Sector ETFs
+
+on:
+  schedule:
+    # Runs every Monday at 06:00 UTC
+    - cron: "0 6 * * 1"
+
+  # Also allows you to run it manually from the Actions tab
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-yahoo-sector-etfs
+  cancel-in-progress: false
+
+jobs:
+  update-sector-etfs:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install pandas yfinance
+
+      - name: Download sector ETF lists
+        run: python yahoo_sector_etfs.py
+
+      - name: Commit updated CSV
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add yahoo_sector_etfs.csv
+
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "Update Yahoo sector ETF lists"
+            git push
+          fi
