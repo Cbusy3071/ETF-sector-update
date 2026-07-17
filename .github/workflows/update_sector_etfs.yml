@@ -48,6 +48,19 @@ jobs:
             echo "No changes to commit."
           else
             git commit -m "Update Yahoo sector ETF lists"
-            git pull --rebase origin "${GITHUB_REF_NAME}"
-            git push origin "HEAD:${GITHUB_REF_NAME}"
+            for attempt in 1 2 3; do
+              if git pull --rebase origin "${GITHUB_REF_NAME}" && \
+                 git push origin "HEAD:${GITHUB_REF_NAME}"; then
+                echo "Push succeeded on attempt ${attempt}."
+                break
+              fi
+
+              if [ "${attempt}" -eq 3 ]; then
+                echo "Push failed after ${attempt} attempts."
+                exit 1
+              fi
+
+              echo "Push rejected; retrying in ${attempt}s..."
+              sleep "${attempt}"
+            done
           fi
