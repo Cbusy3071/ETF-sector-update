@@ -12,6 +12,7 @@ from typing import Any, Callable
 
 import pandas as pd
 import yfinance as yf
+from yfinance import ETFQuery
 
 
 RAW_DIR = Path("data/raw")
@@ -27,7 +28,29 @@ SECTORS = {
     "Consumer Staples": ("consumer-defensive", "sec-ind_sec-top-etfs_consumer-defensive"),
     "Energy": ("energy", "sec-ind_sec-top-etfs_energy"),
     "Telecom": ("communication-services", "sec-ind_sec-top-etfs_communication-services"),
+    "Materials": ("basic-materials", "sec-ind_sec-top-etfs_basic-materials"),
+    "Utilities": ("utilities", "sec-ind_sec-top-etfs_utilities"),
+    "REIT": ("real-estate", "sec-ind_sec-top-etfs_real-estate"),
 }
+
+CUSTOM_ETF_LISTS = {
+    "Utilities Infrastructure": ETFQuery(
+        "and",
+        [
+            ETFQuery("eq", ["region", "us"]),
+            ETFQuery("eq", ["categoryname", "Infrastructure"]),
+        ],
+    ),
+    "Emerging Markets": ETFQuery(
+        "and",
+        [
+            ETFQuery("eq", ["region", "us"]),
+            ETFQuery("eq", ["categoryname", "Diversified Emerging Mkts"]),
+        ],
+    ),
+}
+
+ALL_LIST_NAMES = list(SECTORS) + list(CUSTOM_ETF_LISTS)
 
 
 def snake(text: Any) -> str:
@@ -344,6 +367,48 @@ def write_csv_atomic(df: pd.DataFrame, output_file: Path) -> None:
     temporary_file.replace(output_file)
 
 
+def append_quotes(
+    sector: str,
+    source_key: str,
+    source_url: str,
+    quotes: list[dict[str, Any]],
+    retrieved_at: str,
+    all_sector_rows: list[dict[str, Any]],
+) -> None:
+    if not quotes:
+        raise RuntimeError(f"Yahoo returned no ETFs for {sector}")
+
+    sector_rows: list[dict[str, Any]] = []
+
+    for rank, quote in enumerate(quotes, start=1):
+        symbol = quote.get("symbol")
+        if not symbol:
+            continue
+
+        row = {
+            "sector": sector,
+            "yahoo_sector_key": source_key,
+            "rank": rank,
+            "ticker": symbol,
+            "etf_name": quote.get("longName") or quote.get("shortName"),
+            "source_url": source_url,
+            "retrieved_at_utc": retrieved_at,
+        }
+        row.update(flatten(quote, "screen_"))
+        sector_rows.append(row)
+        all_sector_rows.append(row)
+
+    if not sector_rows:
+        raise RuntimeError(f"Yahoo returned no usable ETF tickers for {sector}")
+
+    write_csv_atomic(
+        pd.DataFrame(sector_rows),
+        RAW_DIR / f"{snake(sector)}_screener.csv",
+    )
+
+    print(f"Saved {len(sector_rows)} {sector} screener rows", flush=True)
+
+
 def main() -> None:
     retrieved_at = datetime.now(timezone.utc).isoformat(timespec="seconds")
     RAW_DIR.mkdir(parents=True, exist_ok=True)
@@ -351,40 +416,54 @@ def main() -> None:
 
     all_sector_rows: list[dict[str, Any]] = []
 
+    # Yahoo's standard sector ETF lists.
     for sector, (sector_key, screener_id) in SECTORS.items():
         print(f"\nFetching {sector} screener...", flush=True)
+
         result = request(
             f"{sector} screener",
             lambda sid=screener_id: yf.screen(sid, count=250),
         )
-        quotes = result.get("quotes", [])
-        if not quotes:
-            raise RuntimeError(f"Yahoo returned no ETFs for {sector}")
 
-        sector_rows: list[dict[str, Any]] = []
-        for rank, quote in enumerate(quotes, start=1):
-            symbol = quote.get("symbol")
-            if not symbol:
-                continue
-            row = {
-                "sector": sector,
-                "yahoo_sector_key": sector_key,
-                "rank": rank,
-                "ticker": symbol,
-                "etf_name": quote.get("longName") or quote.get("shortName"),
-                "source_url": f"https://finance.yahoo.com/research-hub/screener/{screener_id}/",
-                "retrieved_at_utc": retrieved_at,
-            }
-            row.update(flatten(quote, "screen_"))
-            sector_rows.append(row)
-            all_sector_rows.append(row)
+        append_quotes(
+            sector=sector,
+            source_key=sector_key,
+            source_url=(
+                "https://finance.yahoo.com/research-hub/screener/"
+                f"{screener_id}/"
+            ),
+            quotes=result.get("quotes", []),
+            retrieved_at=retrieved_at,
+            all_sector_rows=all_sector_rows,
+        )
 
-        write_csv_atomic(
-            pd.DataFrame(sector_rows),
-            RAW_DIR / f"{snake(sector)}_screener.csv",
+    # Yahoo custom ETF category lists for Infrastructure and Emerging Markets.
+    for sector, query in CUSTOM_ETF_LISTS.items():
+        print(f"\nFetching {sector} custom ETF list...", flush=True)
+
+        result = request(
+            f"{sector} custom ETF query",
+            lambda q=query: yf.screen(
+                q,
+                size=250,
+                sortField="fundnetassets",
+                sortAsc=False,
+            ),
+        )
+
+        append_quotes(
+            sector=sector,
+            source_key=snake(sector),
+            source_url="Yahoo Finance custom ETF screener",
+            quotes=result.get("quotes", []),
+            retrieved_at=retrieved_at,
+            all_sector_rows=all_sector_rows,
         )
 
     sector_df = pd.DataFrame(all_sector_rows)
+    if sector_df.empty:
+        raise RuntimeError("No ETF rows were retrieved")
+
     symbols = sorted(sector_df["ticker"].dropna().astype(str).unique())
 
     metadata: list[dict[str, Any]] = []
@@ -395,13 +474,17 @@ def main() -> None:
 
     full_df = sector_df.merge(pd.DataFrame(metadata), on="ticker", how="left")
 
-    for sector in SECTORS:
+    for sector in ALL_LIST_NAMES:
         sector_raw = (
             full_df.loc[full_df["sector"] == sector]
             .drop_duplicates(subset=["ticker"], keep="first")
             .sort_values("rank", kind="stable")
             .reset_index(drop=True)
         )
+
+        if sector_raw.empty:
+            raise RuntimeError(f"Detailed raw output is empty for {sector}")
+
         write_csv_atomic(sector_raw, RAW_DIR / f"{snake(sector)}.csv")
 
     compact_df = build_compact(full_df)
