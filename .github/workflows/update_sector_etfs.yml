@@ -53,8 +53,8 @@ jobs:
 
           RAW_COUNT=$(find data/raw -maxdepth 1 -type f             -name "*.csv" ! -name "*_screener.csv" | wc -l)
 
-          if [ "$RAW_COUNT" -ne 8 ]; then
-            echo "Error: expected 8 detailed raw sector CSV files, found $RAW_COUNT."
+          if [ "$RAW_COUNT" -ne 13 ]; then
+            echo "Error: expected 13 detailed raw sector CSV files, found $RAW_COUNT."
             find data -maxdepth 3 -type f -print
             exit 1
           fi
