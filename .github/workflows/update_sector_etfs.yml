@@ -4,8 +4,7 @@ on:
   workflow_dispatch:
 
   schedule:
-    # Every Monday at 6:00 AM UTC
-    # This is 4:00 PM Sydney during AEST and 5:00 PM during AEDT.
+    # Every Monday at 06:00 UTC
     - cron: "0 6 * * 1"
 
 permissions:
@@ -22,20 +21,19 @@ jobs:
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.12"
-          cache: pip
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pandas yfinance
+          python -m pip install pandas yfinance
 
       - name: Update sector ETF data
         run: |
@@ -46,10 +44,13 @@ jobs:
           test -f data/excel/sector_etfs_compact.csv
 
           python - <<'PY'
-          import pandas as pd
           from pathlib import Path
+          import pandas as pd
 
           output = Path("data/excel/sector_etfs_compact.csv")
+
+          if not output.exists():
+              raise SystemExit(f"Missing output file: {output}")
 
           df = pd.read_csv(output)
 
@@ -67,6 +68,13 @@ jobs:
                   f"Missing required columns: {sorted(missing_columns)}"
               )
 
+          df["ticker"] = (
+              df["ticker"]
+              .astype(str)
+              .str.strip()
+              .str.upper()
+          )
+
           expected_tickers = {
               "ACWI": "Benchmark",
               "NANR": "Theme - Natural Resources",
@@ -74,28 +82,29 @@ jobs:
           }
 
           for ticker, expected_sector in expected_tickers.items():
-              matches = df.loc[df["ticker"].astype(str).str.upper() == ticker]
+              matches = df.loc[df["ticker"] == ticker]
 
               if len(matches) != 1:
                   raise SystemExit(
-                      f"{ticker} should appear exactly once, but appears "
-                      f"{len(matches)} times."
+                      f"{ticker} should appear exactly once, "
+                      f"but appears {len(matches)} times."
                   )
 
-              actual_sector = str(matches.iloc[0]["sector"])
+              actual_sector = str(matches.iloc[0]["sector"]).strip()
 
               if actual_sector != expected_sector:
                   raise SystemExit(
-                      f"{ticker} has sector '{actual_sector}', expected "
-                      f"'{expected_sector}'."
+                      f"{ticker} has sector '{actual_sector}', "
+                      f"expected '{expected_sector}'."
                   )
 
           print(f"Validated {len(df)} rows in {output}")
-          print("ACWI, NANR and BOTZ are present with the correct labels.")
+          print("ACWI, NANR and BOTZ have the correct labels.")
           PY
 
       - name: Show changed files
         run: |
+          echo "Changed files:"
           git status --short
           git diff --stat
 
