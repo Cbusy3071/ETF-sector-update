@@ -37,12 +37,10 @@ jobs:
 
       - name: Update sector ETF data
         run: |
-          python update_sector_etfs.py
+          python yahoo_sector_etfs.py
 
       - name: Validate compact output
         run: |
-          test -f data/excel/sector_etfs_compact.csv
-
           python - <<'PY'
           from pathlib import Path
           import pandas as pd
