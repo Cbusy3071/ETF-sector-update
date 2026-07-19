@@ -50,7 +50,21 @@ CUSTOM_ETF_LISTS = {
     ),
 }
 
-ALL_LIST_NAMES = list(SECTORS) + list(CUSTOM_ETF_LISTS)
+# ETFs required by the workbook but not sourced from Yahoo's standard sector lists.
+# The labels deliberately distinguish them from true sector ETF holdings.
+PINNED_ETFS = {
+    "Benchmark": [
+        {"ticker": "ACWI", "etf_name": "iShares MSCI ACWI ETF"},
+    ],
+    "Theme - Natural Resources": [
+        {"ticker": "NANR", "etf_name": "SPDR S&P North American Natural Resources ETF"},
+    ],
+    "Theme - Robotics & AI": [
+        {"ticker": "BOTZ", "etf_name": "Global X Robotics & Artificial Intelligence ETF"},
+    ],
+}
+
+ALL_LIST_NAMES = list(SECTORS) + list(CUSTOM_ETF_LISTS) + list(PINNED_ETFS)
 
 
 def snake(text: Any) -> str:
@@ -281,7 +295,7 @@ def build_compact(df: pd.DataFrame) -> pd.DataFrame:
     compact["sector"] = df["sector"]
     compact["rank"] = df["rank"]
     compact["ticker"] = df["ticker"]
-    compact["etf_name"] = df["etf_name"]
+    compact["etf_name"] = first_series(df, ["etf_name", "info_long_name", "info_short_name"])
     compact["fund_family"] = first_series(df, ["info_fund_family", "fund_overview_family", "fund_overview_fund_family"])
     compact["category"] = first_series(df, ["info_category", "fund_overview_category", "screen_category_name"])
     compact["inception_date"] = first_series(df, ["info_fund_inception_date", "fund_overview_inception_date", "screen_fund_inception_date"])
@@ -409,6 +423,34 @@ def append_quotes(
     print(f"Saved {len(sector_rows)} {sector} screener rows", flush=True)
 
 
+def append_pinned_etfs(
+    retrieved_at: str,
+    all_sector_rows: list[dict[str, Any]],
+) -> None:
+    for label, etfs in PINNED_ETFS.items():
+        pinned_rows: list[dict[str, Any]] = []
+
+        for rank, etf in enumerate(etfs, start=1):
+            symbol = str(etf["ticker"]).strip().upper()
+            row = {
+                "sector": label,
+                "yahoo_sector_key": "pinned",
+                "rank": rank,
+                "ticker": symbol,
+                "etf_name": etf.get("etf_name"),
+                "source_url": f"https://finance.yahoo.com/quote/{symbol}/",
+                "retrieved_at_utc": retrieved_at,
+            }
+            pinned_rows.append(row)
+            all_sector_rows.append(row)
+
+        write_csv_atomic(
+            pd.DataFrame(pinned_rows),
+            RAW_DIR / f"{snake(label)}_screener.csv",
+        )
+        print(f"Added {len(pinned_rows)} pinned ETF row(s) for {label}", flush=True)
+
+
 def main() -> None:
     retrieved_at = datetime.now(timezone.utc).isoformat(timespec="seconds")
     RAW_DIR.mkdir(parents=True, exist_ok=True)
@@ -460,9 +502,30 @@ def main() -> None:
             all_sector_rows=all_sector_rows,
         )
 
+    # Add workbook-required benchmark and thematic ETFs to the same compact feed.
+    append_pinned_etfs(
+        retrieved_at=retrieved_at,
+        all_sector_rows=all_sector_rows,
+    )
+
     sector_df = pd.DataFrame(all_sector_rows)
     if sector_df.empty:
         raise RuntimeError("No ETF rows were retrieved")
+
+    # A pinned ticker may also appear in a Yahoo sector screener. Keep only the
+    # explicitly labelled pinned row so XLOOKUP has one unambiguous ticker key.
+    pinned_symbols = {
+        str(etf["ticker"]).strip().upper()
+        for etfs in PINNED_ETFS.values()
+        for etf in etfs
+    }
+    sector_df["ticker"] = sector_df["ticker"].astype(str).str.strip().str.upper()
+    sector_df = sector_df.loc[
+        ~(
+            sector_df["ticker"].isin(pinned_symbols)
+            & sector_df["yahoo_sector_key"].ne("pinned")
+        )
+    ].reset_index(drop=True)
 
     symbols = sorted(sector_df["ticker"].dropna().astype(str).unique())
 
