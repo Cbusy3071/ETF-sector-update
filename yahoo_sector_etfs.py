@@ -67,6 +67,76 @@ PINNED_ETFS = {
 ALL_LIST_NAMES = list(SECTORS) + list(CUSTOM_ETF_LISTS) + list(PINNED_ETFS)
 
 
+# Yahoo's predefined "top sector ETF" screeners are candidate generators, not
+# clean sector universes. These mappings are used to validate each returned ETF
+# against its actual equity allocation and sector weights after metadata is fetched.
+SECTOR_WEIGHT_COLUMNS = {
+    "Technology": "fund_sector_weight_technology",
+    "Healthcare": "fund_sector_weight_healthcare",
+    "Industrials": "fund_sector_weight_industrials",
+    "Financials": "fund_sector_weight_financial_services",
+    "Consumer Discretionary": "fund_sector_weight_consumer_cyclical",
+    "Consumer Staples": "fund_sector_weight_consumer_defensive",
+    "Energy": "fund_sector_weight_energy",
+    "Telecom": "fund_sector_weight_communication_services",
+    "Materials": "fund_sector_weight_basic_materials",
+    "Utilities": "fund_sector_weight_utilities",
+    "REIT": "fund_sector_weight_realestate",
+}
+
+# Used only when Yahoo fund-sector-weight data is unavailable.
+SECTOR_CATEGORY_FALLBACKS = {
+    "Technology": {"Technology"},
+    "Healthcare": {"Health"},
+    "Industrials": {"Industrials"},
+    "Financials": {"Financial"},
+    "Consumer Discretionary": {"Consumer Cyclical"},
+    "Consumer Staples": {"Consumer Defensive"},
+    "Energy": {"Equity Energy"},
+    "Telecom": {"Communications"},
+    "Materials": {"Natural Resources"},
+    "Utilities": {"Utilities"},
+    "REIT": {"Real Estate"},
+}
+
+MIN_STOCK_ALLOCATION = 0.70
+MIN_TARGET_SECTOR_WEIGHT = 0.45
+
+# Categories or names that identify products that should not enter a plain
+# equity-sector universe even when Yahoo attaches them to a sector screener.
+EXCLUDED_CATEGORY_TERMS = (
+    "bond",
+    "fixed income",
+    "commodity",
+    "commodities",
+    "currency",
+    "digital asset",
+    "crypto",
+    "leveraged",
+    "inverse",
+    "options trading",
+    "derivative income",
+    "convertibles",
+    "preferred stock",
+)
+
+EXCLUDED_NAME_PATTERNS = (
+    r"\b[23]x\b",
+    r"\b2 x\b",
+    r"\b3 x\b",
+    r"\bbull\b",
+    r"\bbear\b",
+    r"\bultra(?:pro)?\b",
+    r"\bshort\b",
+    r"\binverse\b",
+    r"\bdaily target\b",
+    r"\bsingle stock\b",
+    r"\bbitcoin\b",
+    r"\bethereum\b",
+    r"\bcrypto\b",
+)
+
+
 def snake(text: Any) -> str:
     value = str(text)
     value = re.sub(r"(.)([A-Z][a-z]+)", r"\1_\2", value)
@@ -144,6 +214,149 @@ def first_series(df: pd.DataFrame, columns: list[str]) -> pd.Series:
     for column in existing[1:]:
         result = result.combine_first(df[column])
     return result
+
+
+
+def text_value(value: Any) -> str:
+    if value is None or value is pd.NA:
+        return ""
+    try:
+        if pd.isna(value):
+            return ""
+    except (TypeError, ValueError):
+        pass
+    return str(value).strip()
+
+
+def row_category(row: pd.Series) -> str:
+    for column in (
+        "info_category",
+        "fund_overview_category_name",
+        "fund_overview_category",
+        "screen_category_name",
+    ):
+        value = text_value(row.get(column))
+        if value:
+            return value
+    return ""
+
+
+def row_name(row: pd.Series) -> str:
+    for column in ("etf_name", "info_long_name", "info_short_name", "screen_long_name"):
+        value = text_value(row.get(column))
+        if value:
+            return value
+    return text_value(row.get("ticker"))
+
+
+def excluded_product_reason(row: pd.Series) -> str | None:
+    category = row_category(row).lower()
+    name = row_name(row).lower()
+
+    for term in EXCLUDED_CATEGORY_TERMS:
+        if term in category:
+            return f"excluded category: {row_category(row)}"
+
+    for pattern in EXCLUDED_NAME_PATTERNS:
+        if re.search(pattern, name, flags=re.IGNORECASE):
+            return f"excluded product name: {row_name(row)}"
+
+    return None
+
+
+def sector_validation_reason(row: pd.Series) -> str | None:
+    sector = text_value(row.get("sector"))
+    if sector not in SECTORS:
+        return None
+
+    excluded_reason = excluded_product_reason(row)
+    if excluded_reason:
+        return excluded_reason
+
+    stock_weight = safe_numeric(row.get("fund_asset_class_stock_position"))
+    bond_weight = safe_numeric(row.get("fund_asset_class_bond_position"))
+    target_column = SECTOR_WEIGHT_COLUMNS[sector]
+    target_weight = safe_numeric(row.get(target_column))
+
+    # Asset-class data is a strong veto when Yahoo says the fund is mostly
+    # non-equity. Missing asset-class data is handled by the sector/category tests.
+    if stock_weight is not None and stock_weight < MIN_STOCK_ALLOCATION:
+        return f"stock allocation {stock_weight:.1%} below {MIN_STOCK_ALLOCATION:.0%}"
+
+    if bond_weight is not None and bond_weight > (1 - MIN_STOCK_ALLOCATION):
+        return f"bond allocation {bond_weight:.1%} too high"
+
+    # Prefer actual portfolio sector weights. This catches broad, thematic,
+    # commodity and single-stock products that Yahoo may misplace.
+    if target_weight is not None:
+        if target_weight < MIN_TARGET_SECTOR_WEIGHT:
+            return (
+                f"{sector} weight {target_weight:.1%} below "
+                f"{MIN_TARGET_SECTOR_WEIGHT:.0%}"
+            )
+        return None
+
+    # If fund-sector weights are unavailable, keep only ETFs whose Yahoo/Morningstar
+    # category explicitly matches the requested sector. The fallback is deliberately
+    # conservative: missing evidence means exclusion rather than contamination.
+    category = row_category(row)
+    allowed_categories = SECTOR_CATEGORY_FALLBACKS.get(sector, set())
+    if category not in allowed_categories:
+        return f"no usable sector weight and category {category!r} is not allowed"
+
+    return None
+
+
+def filter_sector_etfs(df: pd.DataFrame) -> pd.DataFrame:
+    keep_mask = pd.Series(True, index=df.index)
+    removals: list[tuple[str, str, str]] = []
+    input_sector_names = {
+        text_value(value)
+        for value in df["sector"].dropna()
+        if text_value(value) in SECTORS
+    }
+
+    for index, row in df.iterrows():
+        sector = text_value(row.get("sector"))
+        if sector not in SECTORS:
+            continue
+
+        reason = sector_validation_reason(row)
+        if reason:
+            keep_mask.loc[index] = False
+            removals.append((sector, text_value(row.get("ticker")), reason))
+
+    for sector, ticker, reason in removals:
+        print(f"Filtered {sector} ETF {ticker}: {reason}", flush=True)
+
+    filtered = df.loc[keep_mask].copy()
+
+    # Re-rank after exclusions so downstream Excel lists remain contiguous.
+    filtered = filtered.sort_values(["sector", "rank"], kind="stable")
+    filtered["rank"] = filtered.groupby("sector", sort=False).cumcount() + 1
+
+    for sector in input_sector_names:
+        if filtered.loc[filtered["sector"] == sector].empty:
+            raise RuntimeError(
+                f"Sector ETF validation removed every candidate for {sector}"
+            )
+
+    return filtered.reset_index(drop=True)
+
+
+def validate_sector_etfs(df: pd.DataFrame) -> None:
+    invalid: list[str] = []
+
+    for _, row in df.loc[df["sector"].isin(SECTORS)].iterrows():
+        reason = sector_validation_reason(row)
+        if reason:
+            invalid.append(
+                f"{row.get('sector')}:{row.get('ticker')} ({reason})"
+            )
+
+    if invalid:
+        sample = "; ".join(invalid[:10])
+        raise RuntimeError(f"Invalid ETFs remain in sector output: {sample}")
 
 
 def value_from_operations(operations: pd.DataFrame, symbol: str, labels: list[str]) -> Any:
@@ -297,7 +510,10 @@ def build_compact(df: pd.DataFrame) -> pd.DataFrame:
     compact["ticker"] = df["ticker"]
     compact["etf_name"] = first_series(df, ["etf_name", "info_long_name", "info_short_name"])
     compact["fund_family"] = first_series(df, ["info_fund_family", "fund_overview_family", "fund_overview_fund_family"])
-    compact["category"] = first_series(df, ["info_category", "fund_overview_category", "screen_category_name"])
+    compact["category"] = first_series(
+        df,
+        ["info_category", "fund_overview_category_name", "fund_overview_category", "screen_category_name"],
+    )
     compact["inception_date"] = first_series(df, ["info_fund_inception_date", "fund_overview_inception_date", "screen_fund_inception_date"])
     compact["total_assets"] = first_series(df, ["info_total_assets", "screen_total_assets", "screen_net_assets"])
     compact["expense_ratio_pct"] = first_series(
@@ -536,6 +752,11 @@ def main() -> None:
         time.sleep(0.35)
 
     full_df = sector_df.merge(pd.DataFrame(metadata), on="ticker", how="left")
+
+    # Yahoo sector screeners are noisy. Validate candidates against actual
+    # fund asset-class/sector data before anything is written to raw or compact output.
+    full_df = filter_sector_etfs(full_df)
+    validate_sector_etfs(full_df)
 
     for sector in ALL_LIST_NAMES:
         sector_raw = (
